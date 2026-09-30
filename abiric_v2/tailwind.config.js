@@ -8,11 +8,29 @@ module.exports = {
     extend: {
       colors: {
         abiric: {
-          forest: "#1e3a2f",
-          forestDark: "#142720",
-          black: "#141414",
-          accent: "#2d6a4a",
-          accentLight: "#3f8c63",
+          // Core brand
+          forest: "#173D32",
+          forestDark: "#0D2B23",
+          forestSoft: "#245447",
+
+          // Salmon brand accent
+          salmon: "#F28C82",
+          salmonLight: "#F7AAA2",
+          salmonDark: "#D96F66",
+
+          // Application surfaces
+          black: "#101312",
+          charcoal: "#161A18",
+          surface: "#1C211F",
+          surfaceLight: "#242A27",
+
+          // Typography
+          cream: "#F5F1EA",
+          muted: "#9CA8A2",
+
+          // Compatibility with existing components
+          accent: "#F28C82",
+          accentLight: "#F7AAA2",
         },
       },
     },

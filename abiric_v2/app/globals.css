@@ -6,7 +6,79 @@
   color-scheme: dark;
 }
 
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: #101312;
+}
+
 body {
-  background-color: #141414;
-  color: #e8ece9;
+  margin: 0;
+  background:
+    radial-gradient(circle at 80% -10%, rgba(36, 84, 71, 0.18), transparent 32rem),
+    #101312;
+  color: #f5f1ea;
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: #f28c82;
+  color: #101312;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #101312;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #35413c;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #f28c82;
+}
+
+@layer components {
+  .abiric-card {
+    @apply rounded-2xl border border-white/10 bg-abiric-surface p-5 shadow-lg;
+  }
+
+  .abiric-label {
+    @apply text-xs font-semibold uppercase tracking-[0.14em] text-abiric-muted;
+  }
+
+  .abiric-input {
+    @apply w-full rounded-xl border border-white/10 bg-abiric-charcoal px-4 py-3 text-abiric-cream outline-none transition;
+  }
+
+  .abiric-input:focus {
+    @apply border-abiric-salmon ring-2 ring-abiric-salmon/10;
+  }
+
+  .abiric-button {
+    @apply inline-flex items-center justify-center rounded-xl bg-abiric-salmon px-4 py-2.5 text-sm font-semibold text-abiric-black transition;
+  }
+
+  .abiric-button:hover {
+    @apply bg-abiric-salmonLight;
+    transform: translateY(-1px);
+  }
+
+  .abiric-button-secondary {
+    @apply inline-flex items-center justify-center rounded-xl border border-white/10 bg-abiric-surfaceLight px-4 py-2.5 text-sm font-medium text-abiric-cream transition;
+  }
+
+  .abiric-button-secondary:hover {
+    @apply border-abiric-salmon/40 bg-abiric-forestSoft/40;
+  }
 }
