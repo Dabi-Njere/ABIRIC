@@ -16,9 +16,15 @@ export async function POST(req) {
     .eq("email", email.toLowerCase().trim())
     .single();
 
-  if (error || !user) {
-    return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
-  }
+ if (error || !user) {
+  console.error("ABIRIC LOGIN DB ERROR:", error);
+  console.error("ABIRIC LOGIN USER FOUND:", !!user);
+
+  return NextResponse.json(
+    { error: "Invalid email or password." },
+    { status: 401 }
+  );
+}
 
   const valid = await verifyPassword(password, user.password_hash);
   if (!valid) {
