@@ -6,7 +6,34 @@ function generateBidId() {
   const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
   return `BID-${rand}`;
 }
+export async function GET(req) {
+  const user = getUserFromRequest(req);
 
+  if (!user) {
+    return NextResponse.json(
+      { error: "Not authenticated." },
+      { status: 401 }
+    );
+  }
+
+  const db = supabaseAdmin();
+
+  const { data, error } = await db
+    .from("tracked_contracts")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({
+    contracts: data || [],
+  });
+}
 export async function POST(req) {
   const user = getUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
