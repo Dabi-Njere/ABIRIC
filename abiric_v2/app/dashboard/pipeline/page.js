@@ -83,6 +83,59 @@ export default function PipelinePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [updatingId, setUpdatingId] = useState(null);
+  const [manualOpen, setManualOpen] = useState(false);
+const [creating, setCreating] = useState(false);
+const [manualForm, setManualForm] = useState({
+  title: "",
+  reference_number: "",
+  organization: "",
+  category: "",
+  region: "",
+  closing_date: "",
+  estimated_value: "",
+  tender_url: "",
+  notes: "",
+});
+
+async function createOpportunity(e) {
+  e.preventDefault();
+  setCreating(true);
+  setError("");
+
+  try {
+    const res = await fetch("/api/contracts/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(manualForm),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Unable to create opportunity.");
+    }
+
+    setContracts((current) => [data.tracked, ...current]);
+
+    setManualForm({
+      title: "",
+      reference_number: "",
+      organization: "",
+      category: "",
+      region: "",
+      closing_date: "",
+      estimated_value: "",
+      tender_url: "",
+      notes: "",
+    });
+
+    setManualOpen(false);
+  } catch (err) {
+    setError(err.message || "Unable to create opportunity.");
+  } finally {
+    setCreating(false);
+  }
+}
 
   async function loadPipeline() {
     setLoading(true);
@@ -227,13 +280,170 @@ export default function PipelinePage() {
           </p>
         </div>
 
-        <Link
-          href="/dashboard/discover"
-          className="abiric-button"
-        >
-          + Find Opportunity
-        </Link>
+        <div className="flex flex-wrap gap-3">
+  <button
+    type="button"
+    onClick={() => setManualOpen(true)}
+    className="abiric-button"
+  >
+    + Add Opportunity
+  </button>
+
+  <Link
+    href="/dashboard/discover"
+    className="abiric-button-secondary"
+  >
+    CanadaBuys Import
+  </Link>
+</div>
       </section>
+{manualOpen && (
+  <section className="rounded-2xl border border-abiric-salmon/20 bg-abiric-surface p-5">
+    <div className="mb-5 flex items-center justify-between">
+      <div>
+        <h2 className="text-lg font-semibold text-abiric-cream">
+          Add Opportunity
+        </h2>
+        <p className="mt-1 text-xs text-abiric-muted">
+          Add a tender or business opportunity to the ABIRIC pipeline.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => setManualOpen(false)}
+        className="text-sm text-abiric-muted hover:text-abiric-cream"
+      >
+        Close
+      </button>
+    </div>
+
+    <form
+      onSubmit={createOpportunity}
+      className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+    >
+      <input
+        required
+        placeholder="Opportunity title *"
+        value={manualForm.title}
+        onChange={(e) =>
+          setManualForm({ ...manualForm, title: e.target.value })
+        }
+        className="abiric-input"
+      />
+
+      <input
+        placeholder="Reference / solicitation number"
+        value={manualForm.reference_number}
+        onChange={(e) =>
+          setManualForm({
+            ...manualForm,
+            reference_number: e.target.value,
+          })
+        }
+        className="abiric-input"
+      />
+
+      <input
+        placeholder="Government department / client"
+        value={manualForm.organization}
+        onChange={(e) =>
+          setManualForm({
+            ...manualForm,
+            organization: e.target.value,
+          })
+        }
+        className="abiric-input"
+      />
+
+      <input
+        placeholder="Category"
+        value={manualForm.category}
+        onChange={(e) =>
+          setManualForm({ ...manualForm, category: e.target.value })
+        }
+        className="abiric-input"
+      />
+
+      <input
+        placeholder="Region"
+        value={manualForm.region}
+        onChange={(e) =>
+          setManualForm({ ...manualForm, region: e.target.value })
+        }
+        className="abiric-input"
+      />
+
+      <input
+        type="date"
+        value={manualForm.closing_date}
+        onChange={(e) =>
+          setManualForm({
+            ...manualForm,
+            closing_date: e.target.value,
+          })
+        }
+        className="abiric-input"
+      />
+
+      <input
+        type="number"
+        min="0"
+        step="0.01"
+        placeholder="Estimated value"
+        value={manualForm.estimated_value}
+        onChange={(e) =>
+          setManualForm({
+            ...manualForm,
+            estimated_value: e.target.value,
+          })
+        }
+        className="abiric-input"
+      />
+
+      <input
+        type="url"
+        placeholder="Tender URL"
+        value={manualForm.tender_url}
+        onChange={(e) =>
+          setManualForm({
+            ...manualForm,
+            tender_url: e.target.value,
+          })
+        }
+        className="abiric-input"
+      />
+
+      <textarea
+        placeholder="Notes"
+        rows={3}
+        value={manualForm.notes}
+        onChange={(e) =>
+          setManualForm({ ...manualForm, notes: e.target.value })
+        }
+        className="abiric-input md:col-span-2 xl:col-span-3"
+      />
+
+      <div className="flex gap-3 md:col-span-2 xl:col-span-3">
+        <button
+          type="submit"
+          disabled={creating}
+          className="abiric-button disabled:opacity-50"
+        >
+          {creating ? "Adding..." : "Add to Pipeline"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setManualOpen(false)}
+          className="abiric-button-secondary"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  </section>
+)}
 
       {/* SUMMARY */}
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
