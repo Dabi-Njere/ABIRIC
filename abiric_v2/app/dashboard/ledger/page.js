@@ -64,6 +64,7 @@ export default function LedgerPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
+          <p className="abiric-eyebrow">Contract Operations</p>
           <h1 className="text-2xl font-bold text-abiric-cream">Contracts</h1>
           <p className="mt-1 text-sm text-abiric-muted">Awarded contract execution, fulfillment and finance.</p>
         </div>
@@ -71,7 +72,7 @@ export default function LedgerPage() {
       </div>
 
       {summary && (
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Stat label="Active contracts" value={summary.active} />
           <Stat label="Total awarded value" value={money(summary.totalAwarded)} />
           <Stat label="Outstanding receivables" value={money(summary.outstanding)} />
@@ -107,10 +108,10 @@ export default function LedgerPage() {
       ) : (
         <div className="overflow-x-auto rounded-xl border border-white/[0.07]">
           <table className="w-full text-left text-xs">
-            <thead className="bg-abiric-charcoal text-abiric-muted">
+            <thead className="bg-abiric-charcoal">
               <tr>
                 {["Contract #", "Title", "Client", "Award Value", "Status", "Delivery", "Invoiced", "Received", "Outstanding", "Margin"].map((h) => (
-                  <th key={h} className="whitespace-nowrap px-3 py-2 font-semibold uppercase tracking-wide">{h}</th>
+                  <th key={h} className="abiric-th whitespace-nowrap px-3 py-2">{h}</th>
                 ))}
               </tr>
             </thead>

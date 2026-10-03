@@ -18,6 +18,7 @@ body {
   margin: 0;
   background:
     radial-gradient(circle at 80% -10%, rgba(36, 84, 71, 0.18), transparent 32rem),
+    radial-gradient(circle at 8% 15%, rgba(242, 140, 130, 0.07), transparent 28rem),
     #101312;
   color: #f5f1ea;
   min-height: 100vh;
@@ -55,6 +56,19 @@ body {
 
   .abiric-label {
     @apply text-xs font-semibold uppercase tracking-[0.14em] text-abiric-muted;
+  }
+
+  .abiric-eyebrow {
+    @apply mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-abiric-salmon;
+  }
+
+  .abiric-eyebrow::before {
+    content: "";
+    @apply h-2 w-2 shrink-0 rounded-full bg-abiric-salmon;
+  }
+
+  .abiric-th {
+    @apply font-semibold uppercase tracking-wide text-abiric-salmon/70;
   }
 
   .abiric-input {

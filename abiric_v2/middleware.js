@@ -4,7 +4,9 @@ import { verifyTokenEdge } from "@/lib/edge-auth";
 export async function middleware(req) {
   const { pathname } = req.nextUrl;
 
-  if (pathname.startsWith("/dashboard")) {
+  // /print/* lives outside /dashboard on purpose (no sidebar chrome in the
+  // print/PDF output), so it needs the same auth check applied explicitly.
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/print")) {
     const token = req.cookies.get("abiric_token")?.value;
     const user = token ? await verifyTokenEdge(token) : null;
 
@@ -22,5 +24,5 @@ export async function middleware(req) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/dashboard/:path*", "/print/:path*"],
 };

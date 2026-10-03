@@ -8,7 +8,7 @@ const money = (n) =>
 
 const STAGE_STYLES = {
   New: "bg-white/5 text-abiric-muted border-white/10",
-  Reviewing: "bg-abiric-forestSoft/30 text-emerald-200 border-emerald-500/20",
+  Reviewing: "bg-abiric-salmon/10 text-abiric-salmonLight border-abiric-salmon/20",
   Bidding: "bg-abiric-salmon/10 text-abiric-salmon border-abiric-salmon/25",
   Submitted: "bg-abiric-salmon/15 text-abiric-salmon border-abiric-salmon/30",
   Won: "bg-emerald-500/10 text-emerald-300 border-emerald-500/25",
@@ -59,6 +59,7 @@ export default function OpportunitiesPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
+          <p className="abiric-eyebrow">Business Development</p>
           <h1 className="text-2xl font-bold text-abiric-cream">Opportunities</h1>
           <p className="mt-1 text-sm text-abiric-muted">Every tracked opportunity, searchable in one place.</p>
         </div>
@@ -98,10 +99,10 @@ export default function OpportunitiesPage() {
       ) : (
         <div className="overflow-x-auto rounded-xl border border-white/[0.07]">
           <table className="w-full text-left text-xs">
-            <thead className="bg-abiric-charcoal text-abiric-muted">
+            <thead className="bg-abiric-charcoal">
               <tr>
                 {["Title", "Reference", "Organization", "Closing", "Est. Value", "Stage"].map((h) => (
-                  <th key={h} className="whitespace-nowrap px-3 py-2 font-semibold uppercase tracking-wide">{h}</th>
+                  <th key={h} className="abiric-th whitespace-nowrap px-3 py-2">{h}</th>
                 ))}
               </tr>
             </thead>

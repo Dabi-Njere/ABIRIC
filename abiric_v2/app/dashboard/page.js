@@ -43,7 +43,7 @@ export default async function DashboardHome() {
 
   const kpiCards = [
     { label: "Pipeline Value", value: money(data.kpis.pipelineValue), detail: "Open opportunities, estimated", accent: "salmon" },
-    { label: "Active Bids", value: String(data.kpis.activeBids), detail: "In bidding or submitted", accent: "green" },
+    { label: "Active Bids", value: String(data.kpis.activeBids), detail: "In bidding or submitted", accent: "salmon" },
     { label: "Contracts Won", value: String(data.kpis.contractsWon), detail: `Awarded value: ${money(data.kpis.totalAwardedValue)}`, accent: "green" },
     { label: "Receivables", value: money(data.kpis.outstandingReceivables), detail: "Invoiced, not yet collected", accent: "salmon" },
   ];
@@ -69,7 +69,7 @@ export default async function DashboardHome() {
       </section>
 
       {/* KPI GRID */}
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {kpiCards.map((card) => (
           <div key={card.label} className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-abiric-surface p-5 transition hover:-translate-y-0.5 hover:border-abiric-salmon/25">
             <div className={`absolute left-0 top-0 h-full w-1 ${card.accent === "salmon" ? "bg-abiric-salmon" : "bg-abiric-forestSoft"}`} />
@@ -84,7 +84,7 @@ export default async function DashboardHome() {
       </section>
 
       {/* MAIN OPERATING AREA */}
-      <section className="grid gap-5 xl:grid-cols-[1.55fr_1fr]">
+      <section className="grid gap-5 lg:grid-cols-[1.55fr_1fr]">
         {/* PIPELINE */}
         <div className="abiric-card">
           <div className="flex items-center justify-between border-b border-white/[0.07] pb-4">
@@ -162,7 +162,7 @@ export default async function DashboardHome() {
       </section>
 
       {/* FINANCIAL + QUICK ACTIONS */}
-      <section className="grid gap-5 xl:grid-cols-[1.2fr_1fr]">
+      <section className="grid gap-5 lg:grid-cols-[1.2fr_1fr]">
         <div className="abiric-card">
           <div className="flex items-center justify-between">
             <div>

@@ -44,17 +44,23 @@ export default function AccountingPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-abiric-cream">Accounting</h1>
-        <p className="mt-1 text-sm text-abiric-muted">
-          Aggregated directly from contract ledger transactions — not a separate set of books.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="abiric-eyebrow">Financial Reporting</p>
+          <h1 className="text-2xl font-bold text-abiric-cream">Accounting</h1>
+          <p className="mt-1 text-sm text-abiric-muted">
+            Aggregated directly from contract ledger transactions — not a separate set of books.
+          </p>
+        </div>
+        <Link href="/print/statement" target="_blank" className="abiric-button-secondary">
+          Monthly Statement (PDF)
+        </Link>
       </div>
 
       {/* FINANCIAL SUMMARY */}
       <section>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-abiric-muted">Financial Summary</h2>
-        <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-4">
           <Stat label="Revenue (invoiced)" value={money(fs.revenueTotal)} />
           <Stat label="Cash collected" value={money(fs.paidInTotal)} />
           <Stat label="Accounts receivable" value={money(fs.accountsReceivable)} />
@@ -127,7 +133,7 @@ export default function AccountingPage() {
           </button>
         </div>
         <Table
-          columns={["Invoice", "Contract", "Client", "Invoice Date", "Due", "Total", "Paid", "Outstanding", "Status"]}
+          columns={["Invoice", "Contract", "Client", "Invoice Date", "Due", "Total", "Paid", "Outstanding", "Status", ""]}
           rows={receivables.map((r) => [
             r.invoiceNumber,
             r.contractNumber,
@@ -138,6 +144,9 @@ export default function AccountingPage() {
             money(r.paid),
             money(r.outstanding),
             <StatusBadge key={r.id} status={r.status} />,
+            <Link key={`print-${r.id}`} href={`/print/invoice/${r.id}`} target="_blank" className="text-abiric-salmon hover:text-abiric-salmonLight">
+              Print
+            </Link>,
           ])}
           empty="No invoices yet."
         />
@@ -212,10 +221,10 @@ function Table({ columns, rows, empty }) {
   return (
     <div className="overflow-x-auto rounded-xl border border-white/[0.07]">
       <table className="w-full text-left text-xs">
-        <thead className="bg-abiric-charcoal text-abiric-muted">
+        <thead className="bg-abiric-charcoal">
           <tr>
             {columns.map((c) => (
-              <th key={c} className="px-3 py-2 font-semibold uppercase tracking-wide">{c}</th>
+              <th key={c} className="abiric-th px-3 py-2">{c}</th>
             ))}
           </tr>
         </thead>

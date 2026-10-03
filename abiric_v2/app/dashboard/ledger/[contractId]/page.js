@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 const money = (n) => Number(n || 0).toLocaleString("en-CA", { style: "currency", currency: "CAD" });
 
@@ -177,7 +178,21 @@ export default function ContractWorkspace({ params }) {
         <Section
           title="Invoices"
           items={invoices}
-          renderItem={(i) => `${i.invoice_number} — ${money(i.amount)}${i.gst_hst_amount ? ` (+${money(i.gst_hst_amount)} GST/HST)` : ""} [${i.paid_status || ""}]`}
+          renderItem={(i) => (
+            <span className="flex flex-wrap items-center justify-between gap-2">
+              <span>
+                {i.invoice_number} — {money(i.amount)}
+                {i.gst_hst_amount ? ` (+${money(i.gst_hst_amount)} GST/HST)` : ""} [{i.paid_status || ""}]
+              </span>
+              <Link
+                href={`/print/invoice/${i.id}`}
+                target="_blank"
+                className="text-xs font-semibold text-abiric-salmon hover:text-abiric-salmonLight"
+              >
+                Print →
+              </Link>
+            </span>
+          )}
           fields={[
             { key: "invoice_number", label: "Invoice #" },
             { key: "customer_name", label: "Customer (optional, defaults to client)" },

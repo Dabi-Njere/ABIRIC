@@ -540,7 +540,7 @@ async function createOpportunity(e) {
 )}
 
       {/* SUMMARY */}
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <SummaryCard
           label="Tracked"
           value={contracts.length}

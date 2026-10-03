@@ -10,6 +10,7 @@ export default function AdminPage() {
   return (
     <div className="space-y-6">
       <div>
+        <p className="abiric-eyebrow">System Configuration</p>
         <h1 className="text-2xl font-bold text-abiric-cream">Admin</h1>
         <p className="mt-1 text-sm text-abiric-muted">Company settings, users, and the audit trail.</p>
       </div>
@@ -125,13 +126,13 @@ function UsersTab() {
   return (
     <div className="overflow-x-auto rounded-xl border border-white/[0.07]">
       <table className="w-full text-left text-xs">
-        <thead className="bg-abiric-charcoal text-abiric-muted">
+        <thead className="bg-abiric-charcoal">
           <tr>
-            <th className="px-3 py-2 font-semibold uppercase tracking-wide">Name</th>
-            <th className="px-3 py-2 font-semibold uppercase tracking-wide">Email</th>
-            <th className="px-3 py-2 font-semibold uppercase tracking-wide">Role</th>
-            <th className="px-3 py-2 font-semibold uppercase tracking-wide">Admin</th>
-            <th className="px-3 py-2 font-semibold uppercase tracking-wide">Joined</th>
+            <th className="abiric-th px-3 py-2">Name</th>
+            <th className="abiric-th px-3 py-2">Email</th>
+            <th className="abiric-th px-3 py-2">Role</th>
+            <th className="abiric-th px-3 py-2">Admin</th>
+            <th className="abiric-th px-3 py-2">Joined</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-white/[0.06]">
@@ -188,12 +189,12 @@ function AuditLogTab() {
       />
       <div className="max-h-[600px] overflow-y-auto rounded-xl border border-white/[0.07]">
         <table className="w-full text-left text-xs">
-          <thead className="sticky top-0 bg-abiric-charcoal text-abiric-muted">
+          <thead className="sticky top-0 bg-abiric-charcoal">
             <tr>
-              <th className="px-3 py-2 font-semibold uppercase tracking-wide">Timestamp</th>
-              <th className="px-3 py-2 font-semibold uppercase tracking-wide">User</th>
-              <th className="px-3 py-2 font-semibold uppercase tracking-wide">Action</th>
-              <th className="px-3 py-2 font-semibold uppercase tracking-wide">Details</th>
+              <th className="abiric-th px-3 py-2">Timestamp</th>
+              <th className="abiric-th px-3 py-2">User</th>
+              <th className="abiric-th px-3 py-2">Action</th>
+              <th className="abiric-th px-3 py-2">Details</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/[0.06]">
