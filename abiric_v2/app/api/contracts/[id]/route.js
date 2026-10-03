@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { getUserFromRequest } from "@/lib/auth";
+import { isMissingColumnError } from "@/lib/schema-guard";
 
 const VALID_STAGES = [
   "New",
@@ -83,6 +84,27 @@ export async function PATCH(req, { params }) {
 
     if (existing) {
       operationalContract = existing;
+
+      // Backfill the link/value on contracts created before these columns
+      // existed, so older awards resolve a "View Contract" link too.
+      // Tolerates migration 003 not being applied yet — falls back to
+      // skipping the backfill rather than failing the stage change.
+      if (existing.tracked_contract_id === undefined || !existing.tracked_contract_id) {
+        const { data: backfilled, error: backfillError } = await db
+          .from("contracts")
+          .update({
+            tracked_contract_id: tracked.id,
+            awarded_value: existing.awarded_value ?? tracked.estimated_value ?? null,
+          })
+          .eq("id", existing.id)
+          .select()
+          .single();
+        if (backfilled) operationalContract = backfilled;
+        else if (backfillError && !isMissingColumnError(backfillError)) {
+          // Non-schema error — surface it rather than silently continuing.
+          console.error("Contract backfill failed:", backfillError.message);
+        }
+      }
     } else {
       const raw = tracked.raw_data || {};
 
@@ -94,19 +116,39 @@ export async function PATCH(req, { params }) {
         raw["Department"] ||
         null;
 
-      const { data: created, error: createError } = await db
+      const baseInsert = {
+        contract_number: contractNumber,
+        title: tracked.title,
+        line: "procurement",
+        client_name: clientName,
+        tax_reserve_percent: 15,
+        notes: tracked.notes || null,
+        created_by: user.sub,
+      };
+
+      let { data: created, error: createError } = await db
         .from("contracts")
         .insert({
-          contract_number: contractNumber,
-          title: tracked.title,
-          line: "procurement",
-          client_name: clientName,
-          tax_reserve_percent: 15,
-          notes: tracked.notes || null,
-          created_by: user.sub,
+          ...baseInsert,
+          tracked_contract_id: tracked.id,
+          awarded_value: tracked.estimated_value ?? null,
         })
         .select()
         .single();
+
+      // If migration 003_erp_additions.sql hasn't been applied yet, these
+      // two columns won't exist — retry without them so the core
+      // Opportunity → Won → Contract handoff still succeeds. The link/value
+      // then gets backfilled automatically once the migration runs (see
+      // the `existing` branch above, which runs on the next Won/duplicate
+      // check against this same contract_number).
+      if (createError && isMissingColumnError(createError)) {
+        ({ data: created, error: createError } = await db
+          .from("contracts")
+          .insert(baseInsert)
+          .select()
+          .single());
+      }
 
       if (createError) {
         return NextResponse.json(

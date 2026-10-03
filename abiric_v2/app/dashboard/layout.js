@@ -8,28 +8,22 @@ const NAV = [
     description: "Command centre",
   },
   {
-    href: "/dashboard/discover",
-    label: "Discover",
-    icon: "⌕",
-    description: "Find opportunities",
+    href: "/dashboard/opportunities",
+    label: "Opportunities",
+    icon: "☰",
+    description: "List, search & import",
   },
   {
     href: "/dashboard/pipeline",
     label: "Pipeline",
     icon: "◇",
-    description: "Track bids",
+    description: "Stage workflow",
   },
   {
     href: "/dashboard/ledger",
-    label: "Ledger",
+    label: "Contracts",
     icon: "▤",
-    description: "Contracts & costs",
-  },
-  {
-    href: "/dashboard/rfp",
-    label: "AI Drafting",
-    icon: "✦",
-    description: "Draft responses",
+    description: "Fulfillment & finance",
   },
   {
     href: "/dashboard/accounting",
@@ -38,6 +32,12 @@ const NAV = [
     description: "Financial records",
   },
 ];
+
+// Discover (CanadaBuys search) and AI Drafting are demoted out of primary
+// navigation — Discover's live-CSV integration is currently broken and not
+// required for MVP; AI Drafting is optional and not part of the core
+// operational workflow. Routes are left in place rather than deleted so
+// nothing 404s and they can be restored to the nav later without rework.
 
 export default function DashboardLayout({ children }) {
   return (
@@ -165,7 +165,7 @@ export default function DashboardLayout({ children }) {
             </span>
 
             <Link
-              href="/dashboard/discover"
+              href="/dashboard/opportunities"
               className="rounded-xl bg-abiric-salmon px-4 py-2 text-xs font-bold text-abiric-black shadow-lg shadow-black/20 transition hover:bg-abiric-salmonLight"
             >
               + Opportunity

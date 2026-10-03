@@ -51,30 +51,38 @@ function firstValue(object, keys) {
 function getTenderMeta(contract) {
   const raw = contract?.raw_data || {};
 
+  // Dedicated columns are the source of truth — they exist precisely so a
+  // manually entered opportunity doesn't have to round-trip through raw_data
+  // key-guessing. raw_data (from an eventual CSV import) is only a fallback.
   return {
-    organization: firstValue(raw, [
-      "Organization name",
-      "Organization Name",
-      "Organization",
-      "Department",
-      "department",
-    ]),
+    organization:
+      contract?.organization ||
+      firstValue(raw, [
+        "Organization name",
+        "Organization Name",
+        "Organization",
+        "Department",
+        "department",
+      ]),
 
-    region: firstValue(raw, [
-      "Region",
-      "region",
-    ]),
+    region:
+      contract?.region ||
+      firstValue(raw, ["Region", "region"]),
 
-    category: firstValue(raw, [
-      "Category",
-      "category",
-    ]),
+    category:
+      contract?.category ||
+      firstValue(raw, ["Category", "category"]),
 
-    closingDate: firstValue(raw, [
-      "Closing date",
-      "Closing Date",
-      "closingDate",
-    ]),
+    closingDate:
+      contract?.closing_date ||
+      firstValue(raw, ["Closing date", "Closing Date", "closingDate"]),
+
+    estimatedValue:
+      contract?.estimated_value !== null && contract?.estimated_value !== undefined
+        ? Number(contract.estimated_value)
+        : null,
+
+    tenderUrl: contract?.tender_url || firstValue(raw, ["Tender URL", "url"]),
   };
 }
 
@@ -152,7 +160,39 @@ async function createOpportunity(e) {
         throw new Error(data.error || "Unable to load pipeline.");
       }
 
-      setContracts(data.contracts || []);
+      let opportunities = data.contracts || [];
+
+      // Resolve "View Contract" links for opportunities already Won from a
+      // previous session — contracts.tracked_contract_id is the source of
+      // truth; contract_number vs. reference_number/bid_id is the fallback
+      // for contracts created before that column existed.
+      const wonIds = opportunities.filter((o) => o.stage === "Won");
+      if (wonIds.length > 0) {
+        try {
+          const ledgerRes = await fetch("/api/ledger/contracts", { cache: "no-store" });
+          const ledgerData = await ledgerRes.json();
+          const allContracts = ledgerData.contracts || [];
+
+          const byTrackedId = new Map(
+            allContracts.filter((c) => c.tracked_contract_id).map((c) => [c.tracked_contract_id, c.id])
+          );
+          const byContractNumber = new Map(allContracts.map((c) => [c.contract_number, c.id]));
+
+          opportunities = opportunities.map((o) => {
+            if (o.stage !== "Won") return o;
+            const matchId =
+              byTrackedId.get(o.id) ||
+              byContractNumber.get(o.reference_number) ||
+              byContractNumber.get(o.bid_id) ||
+              null;
+            return matchId ? { ...o, operational_contract_id: matchId } : o;
+          });
+        } catch {
+          // Non-fatal — the pipeline still works without the resolved link.
+        }
+      }
+
+      setContracts(opportunities);
     } catch (err) {
       setError(err.message || "Unable to load pipeline.");
     } finally {
@@ -190,7 +230,12 @@ async function createOpportunity(e) {
       setContracts((current) =>
         current.map((item) =>
           item.id === contract.id
-            ? { ...item, ...data.contract }
+            ? {
+                ...item,
+                ...data.contract,
+                operational_contract_id:
+                  data.operational_contract?.id || item.operational_contract_id,
+              }
             : item
         )
       );
@@ -256,6 +301,39 @@ async function createOpportunity(e) {
   const submittedCount = stageCounts.Submitted || 0;
   const wonCount = stageCounts.Won || 0;
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("recent");
+
+  const visibleContracts = useMemo(() => {
+    let list = contracts;
+
+    if (searchTerm.trim()) {
+      const q = searchTerm.trim().toLowerCase();
+      list = list.filter((c) => {
+        const meta = getTenderMeta(c);
+        return (
+          c.title?.toLowerCase().includes(q) ||
+          c.reference_number?.toLowerCase().includes(q) ||
+          meta.organization?.toLowerCase().includes(q)
+        );
+      });
+    }
+
+    if (sortBy === "value") {
+      list = [...list].sort(
+        (a, b) => (Number(b.estimated_value) || 0) - (Number(a.estimated_value) || 0)
+      );
+    } else if (sortBy === "deadline") {
+      list = [...list].sort((a, b) => {
+        const da = a.closing_date ? new Date(a.closing_date).getTime() : Infinity;
+        const db = b.closing_date ? new Date(b.closing_date).getTime() : Infinity;
+        return da - db;
+      });
+    }
+
+    return list;
+  }, [contracts, searchTerm, sortBy]);
+
   return (
     <div className="space-y-7">
 
@@ -289,14 +367,30 @@ async function createOpportunity(e) {
     + Add Opportunity
   </button>
 
-  <Link
-    href="/dashboard/discover"
-    className="abiric-button-secondary"
-  >
-    CanadaBuys Import
-  </Link>
 </div>
       </section>
+
+      {/* SEARCH / SORT */}
+      {contracts.length > 0 && (
+        <section className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search title, reference or client..."
+            className="w-full rounded-xl border border-white/10 bg-abiric-charcoal px-3 py-2 text-xs text-abiric-cream outline-none focus:border-abiric-salmon sm:max-w-xs"
+          />
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="rounded-xl border border-white/10 bg-abiric-charcoal px-3 py-2 text-xs text-abiric-cream outline-none focus:border-abiric-salmon"
+          >
+            <option value="recent">Sort: Most recent</option>
+            <option value="deadline">Sort: Closing date</option>
+            <option value="value">Sort: Estimated value</option>
+          </select>
+        </section>
+      )}
 {manualOpen && (
   <section className="rounded-2xl border border-abiric-salmon/20 bg-abiric-surface p-5">
     <div className="mb-5 flex items-center justify-between">
@@ -503,16 +597,17 @@ async function createOpportunity(e) {
           </h2>
 
           <p className="mx-auto mt-2 max-w-md text-xs leading-5 text-abiric-muted">
-            Track an opportunity from Discover and it will enter the New
-            stage automatically.
+            Add an opportunity manually to start tracking it through
+            qualification, bidding, and award.
           </p>
 
-          <Link
-            href="/dashboard/discover"
+          <button
+            type="button"
+            onClick={() => setManualOpen(true)}
             className="abiric-button mt-5"
           >
-            Find Opportunities
-          </Link>
+            + Add Opportunity
+          </button>
         </section>
       )}
 
@@ -521,7 +616,7 @@ async function createOpportunity(e) {
         <section className="overflow-x-auto pb-4">
           <div className="grid min-w-[1500px] grid-cols-6 gap-4">
             {STAGES.map((stage) => {
-              const stageContracts = contracts.filter(
+              const stageContracts = visibleContracts.filter(
                 (contract) => contract.stage === stage
               );
 
@@ -693,7 +788,38 @@ function OpportunityCard({
             salmon
           />
         )}
+
+        {meta.estimatedValue !== null && (
+          <MetaRow
+            label="Est. value"
+            value={meta.estimatedValue.toLocaleString("en-CA", {
+              style: "currency",
+              currency: "CAD",
+              maximumFractionDigits: 0,
+            })}
+          />
+        )}
       </div>
+
+      {meta.tenderUrl && (
+        <a
+          href={meta.tenderUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 block truncate text-[10px] font-semibold text-abiric-salmon hover:text-abiric-salmonLight"
+        >
+          View tender ↗
+        </a>
+      )}
+
+      {contract.stage === "Won" && contract.operational_contract_id && (
+        <Link
+          href={`/dashboard/ledger/${contract.operational_contract_id}`}
+          className="mt-3 block rounded-lg border border-emerald-500/25 bg-emerald-500/[0.06] px-3 py-2 text-center text-[11px] font-semibold text-emerald-300 transition hover:bg-emerald-500/[0.12]"
+        >
+          View Contract →
+        </Link>
+      )}
 
       <div className="mt-4 border-t border-white/[0.06] pt-3">
         <label className="mb-1.5 block text-[9px] font-semibold uppercase tracking-[0.12em] text-white/30">

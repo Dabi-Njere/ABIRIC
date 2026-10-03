@@ -69,6 +69,23 @@ export async function POST(req) {
     contract.referenceNumber ||
     null;
 
+  // Same duplicate guard as CSV import — a reference number already being
+  // tracked is treated as a conflict rather than silently creating a
+  // second opportunity for the same solicitation.
+  if (reference_number) {
+    const { data: dup } = await db
+      .from("tracked_contracts")
+      .select("id, title")
+      .eq("reference_number", reference_number)
+      .maybeSingle();
+    if (dup) {
+      return NextResponse.json(
+        { error: `Reference ${reference_number} is already tracked as "${dup.title}".` },
+        { status: 409 }
+      );
+    }
+  }
+
   const organization =
     contract.organization ||
     contract["Organization name"] ||
